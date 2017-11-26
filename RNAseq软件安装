@@ -1,0 +1,19 @@
+#以下均在linux系统下进行
+#1.axel安装
+sudo apt-get install axel #axel 是一种多线程的高速下载软件，用法如下
+axel -n 100 ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByStudy/sra/SRP/SRP069/SRP069340/SRR3147202/SRR3147202.sra
+#解析 -n是参数，代表线程数，后面的100是接的线程数，一般选择50到200之间就足够。后面直接跟网址，上面代码就是在NCBI的SRA数据库中下载RNAseq数据。
+#ftp网站数据下载受距离和网络影响，三大生物信息数据库NCBI，EBI，DDBJ，如果受距离问题影响中国国内可以选择从日本的DDBJ或者欧洲EBI下载数据。
+#2.conda安装
+mkdir src
+cd src
+wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
+bash Miniconda2-latest-Linux-x86_64.sh
+#在安装过程中会出现选择，默认选y就可以，然后安装到~/miniconda2下。添加源，国内有清华的源，但是我用起来还是不好用。
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/msys2/
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
+conda config --add channels bioconda
+conda config --set show_channel_urls yes
+#用conda安装软件
+conda install software name #software name是你要安装的软件名称，进入conda网址可以查看可以通过conda安装的200多个软件。
