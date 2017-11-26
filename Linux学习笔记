@@ -1,0 +1,44 @@
+#文件部分
+#1.创建文件
+$: mkdir [-p] <dir1 [dir2...]> #参数-p后的文件，若所要建立目录的上层目录目前尚未建立，则会一并建立上层目录
+例$: mkdir -p newdir/childir #在根目录下创建两个文件，其中childir是newdir的子文件
+
+#2.删除文件
+$: rm -r dirname #删除的文件不是空文件可以此命令
+例$: rm -r childir #在childir文件所在文件路径中打开终端，childir文件中有文本文件，使用此命令删除childir文件
+$: rmdir [-p] <dir1 [dir2...]> #删除指定文件后，该文件的所在文件变成空目录，则将其一并删除
+例$: rmdir -p childir #若childir文件不是空文件则无法删除
+
+#3.移动文件&修改文件名称
+$: mv file1 file2 #当file2不存在时，则是将文件1的名字更改为file2，当file2存在时，则是将文件1移动到file2下
+$: mv file1 file2...filen -t /路径 #将多个文件file1~filen移动到另一目录中。
+例$: mv SRR3589962_2.fastq SRR3589958_1.fastq -t /media/xdy1995/747EF5D87EF592DA/毕业设计练习 #把SRR35...文件移动到另一目录下
+例$: mv 1.txt 2.txt #把1.txt文件 改名为 2.txt
+
+#4.复制文件
+$: cp [-r]/[-t] <source file/dirname> <destinationfile/dirname> #将目录中所有文件或者指定文件复制到目标目录中
+例$: cp 1.txt 2.txt -t /media/xdy1995/GG/CNN #将文本文件1.txt 2.txt复制到CNN文件夹中
+
+#5.查看文件内容
+$: less [-SN] <file1 [file2]> #参数 -S 每行显示不长于屏幕宽度的内容，自动换号显示内容，-N显示行号
+例$: less GPL4592-tbl-1.txt -SN #显示高通量测序数据文件内容
+#使用less打开文件后用ctrl+U上翻页，ctrl+d下翻页，/pattern向下匹配查找，?pattern向上匹配查找，ctrl+X退出
+
+#6.显示访问权限
+$:ls -l <flie>
+例$: ls -l lx.txt #第一个字符后的三个字符代表文件所有者对文件的访问权限用u表示 r代表可读，w代表可写，x代表可执行。文本文件可执行，但一般不写x，因为没有意义。再后面三个字符代表组成员对文件的访问权限用g表示，再后面三个字符代表其他成员对文件的访问权限用o表示。
+
+#7.修改访问权限
+$:chmod u/g/o+/-rwx <file>
+例$: chmod g-rw lx.txt
+S:chmod 777 <file> #数字是8进制数字，第一个7代表4+2+1代表所有文件所有者u对文件的访问权限修改。第二个7代表组成员访问权限，以此类推，另外6代表4+2+0,5代表4+0+1, 1代表0+0+1。对于shell文件，必须为可读文件才可执行，因为shell文件必须要读入终端才可以被执行。
+例$:chmod 770 lx.txt
+
+#8.目录访问权限
+$: ls -ld <path> #最左边的d代表是一个目录d后面三个字符代表Max对其的访问权限，再后面三个字符代表pubs对其的访问权限，再后面三个代表其他用户的执行权限
+例$: ls -ld /media/xdy1995/ECEE560AEE55CE08/毕业设计
+
+#9.修改目录访问权限
+$: chmod u/g/o+/-rwx <path>
+S: chmod 777 <path>
+例$: chmod 777 /home/xdy1995/newdir
