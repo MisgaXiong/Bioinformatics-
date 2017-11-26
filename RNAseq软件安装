@@ -17,3 +17,11 @@ conda config --add channels bioconda
 conda config --set show_channel_urls yes
 #用conda安装软件
 conda install software name #software name是你要安装的软件名称，进入conda网址可以查看可以通过conda安装的200多个软件。
+#3.sratookit安装
+cd src
+wget https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/2.8.2-1/sratoolkit.2.8.2-1-ubuntu64.tar.gz
+tar -zxvf sratoolkit.2.8.2-1-ubuntu64.tar.gz
+mv sratoolkit.2.8.2-1-ubuntu64 ~/biosoft
+echo 'PATH=$PATH:~/biosoft/sratoolkit.2.8.2-1-ubuntu64/bin' >> ~/.bashrc #配置环境变量
+prefetch -v #测试是否安装成功
+prefetch -c SRRXXXXXX #可以利用此软件下载RNAseq原始数据，但是非常慢。
