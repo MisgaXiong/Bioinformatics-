@@ -4,6 +4,8 @@ sudo apt-get install axel #axel 是一种多线程的高速下载软件，用法
 axel -n 100 ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByStudy/sra/SRP/SRP069/SRP069340/SRR3147202/SRR3147202.sra
 #解析 -n是参数，代表线程数，后面的100是接的线程数，一般选择50到200之间就足够。后面直接跟网址，上面代码就是在NCBI的SRA数据库中下载RNAseq数据。
 #ftp网站数据下载受距离和网络影响，三大生物信息数据库NCBI，EBI，DDBJ，如果受距离问题影响中国国内可以选择从日本的DDBJ或者欧洲EBI下载数据。
+
+
 #2.conda安装
 mkdir src
 cd src
@@ -17,6 +19,8 @@ conda config --add channels bioconda
 conda config --set show_channel_urls yes
 #用conda安装软件
 conda install software name #software name是你要安装的软件名称，进入conda网址可以查看可以通过conda安装的200多个软件。
+
+
 #3.sratookit安装
 cd src
 wget https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/2.8.2-1/sratoolkit.2.8.2-1-ubuntu64.tar.gz
@@ -25,3 +29,107 @@ mv sratoolkit.2.8.2-1-ubuntu64 ~/biosoft
 echo 'PATH=$PATH:~/biosoft/sratoolkit.2.8.2-1-ubuntu64/bin' >> ~/.bashrc #配置环境变量
 prefetch -v #测试是否安装成功
 prefetch -c SRRXXXXXX #可以利用此软件下载RNAseq原始数据，但是非常慢。
+
+
+#4.fastqc安装
+#fastqc需要java环境，虽然多数人使用open jdk java，但是我建议使用Oracle java, 由于很多新手刚安装linux后会装上open jdk java9，我建议卸载掉，换成open jdk java8或者Oracle java
+sudo apt-get remove openjdk-9-jdk
+sudo apt-get remove openjdk-9-jre-headless
+sudo mkdir /usr/local/jvm #在根目录下创建文件夹以便之后安装Oracle java
+cd /usr/local/jvm #进入我们创的文件夹
+sudo wget --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/8u101-linux-x64.tar.gz
+#以上这条是因为ubuntu源中没有oracle java包，我们需要添加源。然后运行程序，选择一个源。
+sudo add-apt-repository ppa:webupd8team/java
+sudo apt-get update #升级
+sudo apt-get install oracle-java8-installer #下载
+sudo apt-get install oracle-java8-set-defaut #配置环境变量
+java -version #检查
+
+cd src #转到我们的正式RNAseq文件夹中准备安装fastqc
+wget http://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.5.zip
+unzip fastqc_v0.11.5.zip #解压
+mv FastQC/ ~/biosoft/ #将可执行程序移动到另外一个文件夹中
+cd ~/biosoft/FastQC/ 
+chmod 770 fastqc #修改权限
+sed -i '/^PATH/s/\(.*\)/\1:~\/biosoft\/FastQC\//' ~/.bashrc #利用sed指令添加环境变量
+source ~/.bashrc #修改~/.bashrc后要source一下保存修改
+fastqc -v
+# FastQC v0.11.5 检查是否安装成功
+
+
+#5.Trimmomatic安装
+#在官网http://www.usadellab.org/cms/?page=trimmomatic下载0.36版本
+unzip Trimmomatic-0.36.zip
+java -jar trimmomatic-0.36.jar #检查是否能够打开
+
+
+#6.hisat2安装
+cd src
+wget ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/downloads/hisat2-2.1.0-source.zip
+unzip hisat2-2.1.0-source.zip
+# 编译hisat2
+cd hisat2-2.1.0
+make
+rm -f *.h *.cpp
+cd ../
+mv hisat2-2.1.0 ~/biosoft/hisat2
+# add to PATH
+sed  '/^PATH/s/\(.*\)/\1:~\/biosoft\/hisat2/' ~/.bashrc -i
+source ~/.bashrc
+# test
+hisat2 -h
+
+
+#7.samtools安装 
+#samtools是存放高通量比对的软件，需要安装很多前置包
+cd src
+sudo apt install autoconf libz-dev libbz2-dev liblzma-dev libssl-dev #这个是系统需要的
+
+wget http://zlib.net/zlib-1.2.11.tar.gz #这个是前置包zlib2
+tar -zxvf zlib-1.2.11.tar.gz && cd zlib-1.2.11 && ./configure && make && sudo make install && cd .. && rm -rf zlib-1.2.11
+
+wget http://bzip.org/1.0.6/bzip2-1.0.6.tar.gz #这个是前置包bzip2
+tar -zxvf bzip2-1.0.6.tar.gz && cd bzip2-1.0.6 &&./configure && make && sudo make install && cd .. && rm -rf  bzip2-1.0.6
+
+sudo apt-get install libncurses5-dev
+
+git clone https://github.com/samtools/htslib.git#将github上一个关于samtools的htslib克隆到本地
+cd htslib
+./configure && make && make install #安装
+
+git clone https://github.com/samtools/samtools.git
+cd samtools
+./configure && make &&make install
+autoconf -Wno-syntax
+./configure
+make && make install prefix=$HOME/biosoft/samtools #这里比较复杂，有时候上一个克隆不好使，可以用这个，当然两个都用也可以。目的是安装samtools
+sed  '/^PATH/s/\(.*\)/\1:~\/biosoft\/samtools\/bin/' .bashrc -i #添加环境变量
+source ~/.bashrc
+
+git clone https://github.com/samtools/bcftools.git
+cd bcftools
+./configure && make && make install #有时候上两个克隆不好使，第三个也行
+samtools --help
+#从徐州更大神那里学到可以顺便安装bcftools
+cd src
+git clone https://github.com/samtools/bcftools.git
+make && make install prefix=$HOME/biosoft/bcftools
+make clean
+sed  '/^PATH/s/\(.*\)/\1:~\/biosoft\/bcftools\/bin/' .bashrc -i
+source ~/.bashrce
+bcftools -h
+#因为是克隆了github,以后更新只需要以下命令
+cd htslib; git pull
+cd ../bcftools; git pull
+make clean
+make
+
+
+#8.安装HTSeq
+sudo apt-get install python-pip
+pip install --upgrade pip
+sudo apt-get install build-essential python2.7-dev python-numpy python-matplotlib
+python
+#退出
+pip install HTSeq
+#自动下载numpy matplotlib
