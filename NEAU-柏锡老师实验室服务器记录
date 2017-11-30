@@ -1,0 +1,14 @@
+#今天终于实验室服务器外网可以连接了，也算是我本科毕业前高端玩一回了。以下将记录我的服务器linux-centos系统之旅
+#我本人电脑是双系统，win10+linux-ubuntu16.04LTS
+#linuxPC终端用ssh访问无服务器
+sudo apt-get install ssh
+ssh xiongdongyan@202.118.163.236
+#进入服务器当然首先是配置软件，由于我不是root用户，配软件很吃力。
+#1.第一次在服务器上发现conda自动下载所有rstudio所需包了，却运行不了。以后一定要搞明白，浪费很多时间在conda上
+我自己创建了以下文件夹
+mkdir src #用于存放下载软件
+mkdir biosoft#用于存放使用软件
+mkdir sra-data#存放毕业论文数据及练习数据
+#sratoolkit安装
+安装方法和RNAseq软件安装一样，只是centosh和ubuntu不是一个版本，在NCBI下载
+wget https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/2.8.2-1/sratoolkit.2.8.2-1-centos_linux64.tar.gz #后续方法参考我写的RNAseq软件安装
