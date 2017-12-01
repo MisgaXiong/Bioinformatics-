@@ -1,0 +1,169 @@
+#1.使用DESeq2法进行差异分析
+#数据的读取
+mydata<-read.table("read_counts.txt",sep="\t",header=T)
+mydata<-as.matrix(mydata)
+rownames(mydata)=mydata[,1]
+mydata<-mydata[,2:ncol(mydata)]
+dimnames<-list(rownames(mydata),colnames(mydata))
+mydata<-matrix(as.numeric(as.matrix(mydata)),nrow=nrow(mydata),dimnames=dimnames(mydata))
+
+#将mydata中的数据传入countdata
+countdata<-mydata[,1:ncol(mydata)]
+
+#根据补充文件，另写一份文件，文件中每列的名字定义为样本处理环境
+condition<-factor(c("control","control","KD","KD","KD","KD","KD","KD","KD","KD","KD","KD","KD","KD","KD","KD","KD","KD","KD"))
+dds<-DESeqDataSetFromMatrix(countdata, data.frame(condition), design= ~ condition )
+
+#过滤low count数
+nrow(dds)
+dds<-dds[ rowSums(counts(dds)) > 1, ]
+nrow(dds)
+
+#使用DESeq进行差异表达分析
+dds<-DESeq(dds)
+
+#用results获取结果以及查看
+res<-results(dds)
+mcols(res, use.names = TRUE)
+
+#画图
+plotMA(res,ylim=c(-10,10))
+topGene <- rownames(res)[which.min(res$padj)]
+with(res[topGene,],{
+  points(baseMean,log2FoldChange,col="dodgerblue",cex=2,lwd=2)
+  text(baseMean,log2FoldChange,topGene,pos=2,col="dodgerblue")
+})
+
+#收缩图像
+res.shrink<-lfcShrink(dds,contrast=c("condition","KD","control"),res=res)
+plotMA(res.shrink,ylim = c(-10,10))
+topGene<-rownames(res)[which.min(res$padj)]
+with(res[topGene,],{
+  points(baseMean,log2FoldChange,col="dodgerblue",cex=2, lwd=2)
+  text(baseMean,log2FoldChange,topGene,pos=2,col="dodgerblue")
+})
+
+#找差异基因
+res.deseq2<-subset(res,padj<0.05)
+
+
+
+2.使用edgeR法差异分析
+#数据的读取
+mydata<-read.table("reads.txt",sep="\t",header=T)
+mydata<-as.matrix(mydata)
+rownames(mydata)=mydata[,1]
+mydata<-mydata[,2:ncol(mydata)]
+dimnames<-list(rownames(mydata),colnames(mydata))
+mydata<-matrix(as.numeric(as.matrix(mydata)),nrow=nrow(mydata),dimnames=dimnames(mydata))
+
+#构建DGEList对象
+library(edgeR)
+group<-factor(c("control","control","KD","KD","KD","KD","KD","KD","KD","KD"))
+genelist<-DGEList(counts=mydata[,1:10], group = group)
+
+
+#利用CPM标准化过滤low count值（这里的0.5(即阈值）等于 10/(最小的文库的 read count数 /1000000)
+#keep.lib.size=FALSE表示重新计算文库大小。）
+keep<- rowSums(cpm(genelist)>0.5)>=2
+genelist.filted<-genelist[keep,,keep.lib.sizes=FALSE]
+
+
+#根据组成偏好(composition bias)标准化，edgeR的calcNormFactors函数使用TMM算法对DGEList标准化
+genelist.norm <- calcNormFactors(genelist.filted)
+
+
+#实验设计矩阵Design matrix，类似于DESeq2中的design参数。
+design <- model.matrix(~0+group)
+colnames(design) <- levels(group)
+design
+
+#估计离散值，负二项分布（negative binomial，NB)需要两个参数，即均值和离散值
+edgeR对每个基因都估测一个经验贝叶斯稳健离散值mpirical Bayes moderated dispersion
+公共离散值（common dispersion)，以及一个趋势离散值
+genelist.Disp<-estimateDisp(genelist.norm,design,robust = TRUE)
+plotBCV(genelist.Disp)
+
+#进一步通过quasi-likelihood(QL)拟合NB模型，用于解释生物学和技术性导致的基因特异性变异
+fit<-glmQLFit(genelist.Disp,design,robust=TRUE)
+head(fit$coefficients)
+
+#差异表达检验（方法1）构建比较矩阵，类似于DESeq2中的results函数的 contrast 参数。
+cntr.vs.KD <- makeContrasts(control-KD, levels=design)
+res <- glmQLFTest(fit, contrast=cntr.vs.KD)
+ig.edger <- res$table[p.adjust(res$table$PValue, method = "BH") < 0.01, ]
+
+
+#提取显著性差异的基因用作下游分析，出图，这里n值代表提取多少个差异表达的基因
+topTags(res,n=10)
+is.de<-decideTestsDGE(res)
+summary(is.de)
+plotMD(res, status=is.de, values=c(1,-1), col=c("red","blue"),
+       legend="topright")
+
+
+#差异表达检验（方法2）考虑基因效应值下的情况，使用glmTreat函数
+tr<-glmTreat(fit, contrast=cntr.vs.KD, lfc=log2(1.5))
+plotMD(tr status=is.de, values=c(1,-1), col=c("red","blue"),legend="topright")
+
+
+
+3.使用limma法差异分析
+#数据读入
+mydata<-read.table("reads.txt",sep="\t",header=T)
+mydata<-as.matrix(mydata)
+rownames(mydata)=mydata[,1]
+mydata<-mydata[,2:ncol(mydata)]
+dimnames<-list(rownames(mydata),colnames(mydata))
+mydata<-matrix(as.numeric(as.matrix(mydata)),nrow=nrow(mydata),dimnames=dimnames(mydata))
+
+#构建DGEList对象
+library(edgeR)
+group<-factor(c("control","control","KD","KD","KD","KD","KD","KD","KD","KD"))
+genelist<-DGEList(counts=mydata[,1:10], group = group)
+
+#用TMM模型对数据进行标准化
+genelist.norm<-calcNormFactors(genelist.filted,method = "TMM")
+
+#差异表达分析（方法1）使用"limma-trend"
+design <- model.matrix(~0+group)
+colnames(design) <- levels(group)
+logCPM <- cpm(genelist.norm, log=TRUE, prior.count=3)
+fit <- lmFit(logCPM, design)
+fit <- eBayes(fit, trend=TRUE)
+topTable(fit, coef=ncol(design))
+
+#写入所有过滤后的基因
+allDiff=topTable(fit, coef=ncol(design),adjust='fdr',number=2000000)
+write.table(allDiff,file="alldiff.xls",sep="\t",quote=F)
+
+
+#将allDiff中的所有基因做火山图
+P.value=allDiff$adj.P.Val
+FC=allDiff$logFC
+df<-data.frame(P.value,FC)
+df$threshold = as.factor(abs(df$FC)>log(1.5,2) & df$P.value<0.05)
+levels(df$threshold)=c('gray','red')
+df$logp = -log10(df$P.value)
+plot(x=df[,2],y=df[,4],pch=16,col=df$threshold,
+xlab="Fold change",ylab="-Log10(Pvalue)",
+cex=0.2,main="Volcano Plot")
+abline(v=c(-log(1.5,2),log(1.5,2)),h=-log10(0.05),col="green")
+
+
+#差异表达分析（方法2）使用"limma-voom"
+v<-voom(genelist.norm,design,plot=TRUE)
+fit<-lmFit(v,design)
+fit<-eBayes(fit)
+all<-topTable(fit,coef=ncol(design),number=10000)
+sig.limma<-all[all$adj.P.Val<0.01,]
+fit<-treat(fit,lfc=log2(1.2))
+topTreat(fit,coef=ncol(design))
+
+#不同程序包差异分析结果比较，先要单独保存各个程序包单独分析的差异基因文件
+write.table(sig.limma,file="sig limma.txt",sep = "\t",quote = T)
+write.table(topTags(res,n=100000),file="sig edgeR.txt",sep = "\t",quote = T)
+write.table(res.deseq2,file="DESeq edgeR.txt",sep = "\t",quote = T)
+siglimma<-read.table("siglimma.txt",sep="\t",quote=T)
+sigedgeR<-read.table("sigedgeR.txt",sep="\t",quote=T)
+sigDESeq2<-read.table("DESeqedgeR.txt",sep="\t",quote=T)
