@@ -59,3 +59,8 @@ for i in `seq 294 309`
 do
 prefetch -c SRR1592${i}
 done
+转换为fastq格式
+for i in `seq 294 309`
+do
+fastq-dump SRR1592${i}
+done
