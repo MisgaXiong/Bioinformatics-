@@ -62,5 +62,5 @@ done
 转换为fastq格式
 for i in `seq 294 309`
 do
-fastq-dump SRR1592${i}
+fastq-dump --gzip --split-3 -O /home/xiongdongyan/sra-data/练习 -A SRR1592${i}
 done
