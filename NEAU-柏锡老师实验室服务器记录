@@ -10,5 +10,41 @@ mkdir src #用于存放下载软件
 mkdir biosoft#用于存放使用软件
 mkdir sra-data#存放毕业论文数据及练习数据
 #sratoolkit安装
-安装方法和RNAseq软件安装一样，只是centosh和ubuntu不是一个版本，在NCBI下载
+安装方法和RNAseq软件安装一样，只是centos和ubuntu不是一个版本，在NCBI下载
 wget https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/2.8.2-1/sratoolkit.2.8.2-1-centos_linux64.tar.gz #后续方法参考我写的RNAseq软件安装
+
+从Ｒ的官网下载了最新的3.4.3的Ｒ
+tar -zxvf R包的名字
+cd ~/scr/R-3.4.3
+./configure --prefix=/home/xiongdongyan/src/R-3.4.3 --enable-R-shlib --with-blas --with-lapack
+＃报错
+ 1.configure: error: No F77 compiler found
+#解决方法　yum install gcc-gfortran
+２.configure: error: --with-readline=yes (default) and headers/libs are not available
+#解决方法 yum install  readline-devel
+3.configure: error: --with-x=yes (default) and X11 headers/libs are not available
+#解决方法 yum install libXt-devel
+4.configure: error: C++ preprocessor "/lib/cpp" fails sanity check
+#解决方法 yum install gcc-c++  glibc-headers
+５.configure: error: zlib library and headers are required
+#解决方法 cd ~/src
+wget http://zlib.net/zlib-1.2.11.tar.gz
+tar -zxvf zlib-1.2.11.tar.gz && cd zlib-1.2.11 && make && make install && cd .. && rm -rf zlib-1.2.11
+都解决好后，　make && make install
+#yum 不是ubuntu的包管理器，ubuntu要单独安装，但是不要用装太多东西。
+#因为自己笔记本误删Ｒ后一直装不好，旧版本装上是错误无options函数，应该是文件有错误，今天顺便在自己笔记本上把root权限给设置了，ubuntu一般是不给root权限的
+sudo passwd
+输入新UNIX密码
+重新输入新UNIX密码
+su root
+输入密码即可成功
+#今天在自己ubuntu系统yum装东西的时候，报错
+E: 无法获得锁 /var/lib/dpkg/lock – open (11: 资源暂时不可用)
+E: 无法锁定管理目录(/var/lib/dpkg/)，是否有其他进程正占用它？
+我查阅资料找到了解决方法
+１．ps -aux ，列出进程。找到含有apt‘-get的进程，直接sudo kill PID。解决
+2.sudo rm /var/cache/apt/archives/lock
+  sudo rm /var/lib/dpkg/lock #强制解锁
+   再次install软件，若提示：E: dpkg 被中断
+  sudo dpkg --configure -a　#解决
+  
