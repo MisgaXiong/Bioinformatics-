@@ -47,4 +47,15 @@ E: 无法锁定管理目录(/var/lib/dpkg/)，是否有其他进程正占用它�
   sudo rm /var/lib/dpkg/lock #强制解锁
    再次install软件，若提示：E: dpkg 被中断
   sudo dpkg --configure -a　#解决
-  
+
+#在sratoolkit软件配置好后开始下载大豆转录组数据。
+＃在/home/xiongdongyan/sra-data/下
+mkdir 练习
+cd /练习/
+#在NCBI官网上的SRA数据库中检索soybean&senescence
+找到BioProject:PRJNA262564　SRA Study:SRP048326
+选择SRR1592294到SRR1592309数据，批量下载
+for i in `seq 294 309`
+do
+prefetch -c SRR1592${i}
+done
