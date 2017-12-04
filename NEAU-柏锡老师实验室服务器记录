@@ -64,3 +64,21 @@ for i in `seq 294 309`
 do
 fastq-dump --gzip --split-3 -O /home/xiongdongyan/sra-data/练习 -A SRR1592${i}
 done
+
+#2017.12.04 今天做质控
+cd ~/sra-data/练习
+mkdir 初次质控
+for i in `seq 294 309`
+do
+fastqc SRR1592{i}_1.fastq.gz SRR1592{i}_2.fastq.gz -O ~/sra-data/练习/初次质控
+done
+
+
+
+
+
+
+
+
+
+
