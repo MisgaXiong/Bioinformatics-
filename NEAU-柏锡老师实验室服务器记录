@@ -73,12 +73,42 @@ do
 fastqc SRR1592{i}_1.fastq.gz SRR1592{i}_2.fastq.gz -O ~/sra-data/练习/初次质控
 done
 
-
-
-
-
-
-
+#2017.12.05开始过滤fastq数据
+#做过滤需要下载trimmomatic软件，登录服务器
+cd ~/src
+wget https://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmomatic-0.36.zip
+unzip Trimmomatic-0.36.zip
+cd ~/sra-data
+mkdir 过滤后数据
+cd ~/sra-data/练习
+for i in `seq 294 309`
+do
+java -jar ~/src/Trimmomatic-0.36/trimmomatic-0.36.jar PE -threads 4 -phred33 -trimlog 
+SRR1592${i}_1.fastq.gz SRR1592${i}_2.fastq.gz SRR1592${i}_1_paired.fastq.gz SRR1592${i}_1_unpaired.fastq.gz
+SRR1592${i}_2_paired.fastq.gz SRR1592${i}_2_unpaired.fastq.gz ILLUMINACLIP:~/src/Trimmomatic-0.36/adapters/
+TruSeq3-PE.fa:2:30:10:1:true LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:51
+done
+#这些参数设置我是阅读了相关资料，http://www.biotrainee.com/thread-1484-1-1.html
+首先关于phred分数是选33还是64
+1. 如果有2个以上的质量字符ASCII值小于等于58(即有两个碱基的得分小于等于25），同时没有任何质量字符的ASCII值大于等于75，即判断是Phred+33。
+2. 如果有2个以上的质量字符ASCII值大于等于75(即有两个碱基的得分大于等于10），同时没有任何质量字符的ASCII值小于等于58，即判断是Phred+64。
+3. 如果所有质量字符的ASCII值介于59到74之间，即判断可能是Phred+33，但建议使用更多的序列做进一步测试（出现这种结果可能有两种情况：1, Phred+33编码，所有碱基质量得分介于26到42之间；2，Phred+64编码，所有碱基质量得分介于-5到10；是前者的可能性大）。
+4. 如果出现上述3种以外的情况，建议打印出质量字符的ASCII值人工判断。
+第二个是keepBothReads：只对 PE 测序的 palindrome clip 模式有效，这个参数很重要，在上图中 D 模式下， 
+R1 和 R2 在去除了接头序列之后剩余的部分是完全反向互补的，默认参数 false，意味着整条去除与 R1 完全反向互补的 R2，当做重复去除掉，但在有些情况下，
+例如需要用到 paired reads 的 bowtie2 流程，就要将这个参数改为 true，否则会损失一部分 paired reads。
+seedMismatches：指定第一步 seed 搜索时允许的错配碱基个数，例如 2。
+palindrome clip threshold：指定针对 PE 的 palindrome clip 模式下，需要 R1 和 R2 之间至少多少比对分值（上图中 D 模式），才会进行接头切除，例如 30。
+simple clip threshold：指定切除接头序列的最低比对分值（上图 A/B 模式），通常 7-15 之间。
+minAdapterLength：只对 PE 测序的 palindrome clip 模式有效，指定 palindrome 模式下可以切除的接头序列最短长度，由于历史的原因，默认值是 8，但实际上 palindrome 模式可以切除短至 1bp 的接头污染，所以可以设置为 1 
+LEADING
+从 reads 的起始端开始切除质量值低于设定的阈值的碱基，直到有一个碱基其质量值达到阈值。
+LEADING:<quality>
+quality:设定碱基质量值阈值，低于这个阈值将被切除。
+TRAILING
+从 reads 的末端开始切除质量值低于设定阈值的碱基，直到有一个碱基质量值达到阈值。
+Illumina 平台有些低质量的碱基质量值被标记为 2 ，所以设置为 3 可以过滤掉这部分低质量碱基。
+官方推荐使用 Sliding Window 和 MaxInfo 来代替 LEADING 和 TAILING。
 
 
 
