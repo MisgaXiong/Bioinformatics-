@@ -110,5 +110,12 @@ TRAILING
 Illumina 平台有些低质量的碱基质量值被标记为 2 ，所以设置为 3 可以过滤掉这部分低质量碱基。
 官方推荐使用 Sliding Window 和 MaxInfo 来代替 LEADING 和 TAILING。
 
-
+#过滤完后 
+mv *paired.fastq.gz *unpaired.fastq.gz *.log ~/sra-data/过滤后数据
+cd ~/sra-data/过滤后数据
+mkdir 过滤后质控
+for i in `seq 294 309`
+do
+fastqc SRR1592${i}_1_paired.fastq.gz SRR1592${i}_2_paired.fastq.gz -O ~/sra-data/过滤后数据/过滤后质控
+done
 
