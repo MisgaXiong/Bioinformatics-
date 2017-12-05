@@ -12,6 +12,8 @@ mkdir sra-data#存放毕业论文数据及练习数据
 #sratoolkit安装
 安装方法和RNAseq软件安装一样，只是centos和ubuntu不是一个版本，在NCBI下载
 wget https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/2.8.2-1/sratoolkit.2.8.2-1-centos_linux64.tar.gz #后续方法参考我写的RNAseq软件安装
+#2017.12.05今天我搞明白了为什么conda安装R后所需环境包都装好了，但是无法启动，原来很简单，我访问的服务器，无法在我的PC端打开图形界面。
+另外我用conda install了其他的软件。当然igv这种图形界面的我还是得把服务器的文件传回终端再用igv打开。#
 
 从Ｒ的官网下载了最新的3.4.3的Ｒ
 tar -zxvf R包的名字
