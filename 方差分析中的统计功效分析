@@ -1,0 +1,27 @@
+library(pwr)
+pwr.anova.test(k= , f= , sig.level= , power= 0.995) #k代表差异表达基因分析的组数，f是方差分析f值，sig.level代表显著性水平，power代表统计功效
+#检验各种效应值下，基于指定大小统计功效下的所需样本容量图
+r<-seq(, , ,)
+nr<-length(r)
+P<-seq(, , ,)
+np<-length(p)
+samsize<-arry(numeric(nr*np),dim=c(nr,np))
+for(i in 1:np){
+ for(j in 1:nr){
+   result<-pwr.r.test(n=NULL, r=r[j]),
+   sig.level= , power=p[i],
+   alternative=" ")
+   samsize[j,i]<-ceiling(result$n)
+   }
+  }
+xrange<-range(r)
+yrange<-round(range(samsize))
+colors<-rainbow(length(p))
+polt(xrange, yrange, type="n",
+     xlab="Correlation Coefficient (r)",
+     ylab="Sample Size (n)")
+for(i in 1:np){
+  lines(r, samsize[,i], type="l", lwd= , col=colors[i])
+  }
+
+
