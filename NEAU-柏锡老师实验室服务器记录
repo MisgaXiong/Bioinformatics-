@@ -120,4 +120,82 @@ for i in `seq 294 309`
 do
 fastqc SRR1592${i}_1_paired.fastq.gz SRR1592${i}_2_paired.fastq.gz -O ~/sra-data/过滤后数据/过滤后质控
 done
+2017.12.11＃reads mapping to reference genome
+＃在Soybase 上下载了第二版的大豆参考基因组，但是发现没有对应注释文件GFF。无奈之下去ensenbl genome上的plant下载第一版的参考基因组及其注释文件
+#在igv中打开参考基因组，先将GFF文件sorted排序，然后将sorted后的GFF文件打开，无误后上传到服务器
+在本地终端打开 
+scp /home/xdy1995/igv/genomes/Glycine_max.V1.0.dna.chromosome.1.fa xiongdongyan@202.118.163.236:~/sra-data/过滤后数据/index
+#用hisat2建立index
+hisat2-build -f ~/sra-data/过滤后数据/index/Glycine_max.V1.0.dna.chromosome.1.fa ~/sra-data/过滤后数据/index/Glycine_max.X.ht2
+for i in `seq 295 298` 
+do  
+hisat2 -t -x ~/sra-data/过滤后数据/index/Glycine_max.X.ht2 -1 ~/sra-data/过滤后数据/SRR1592${i}_1_paired.fastq.gz -2 SRR1592${i}_2_paired.fastq.gz -S ~/sra-data/过滤后数据/过滤后质控/aligned/SRR1592${i}.sam
+done
+#在mapping中
+gzip: /home/xiongdongyan/sra-data/过滤后数据/SRR1592295_1_paired.fastq.gz: unexpected end of file
+gzip: SRR1592295_2_paired.fastq.gz: unexpected end of file
+Error: Read SRR1592295.1894103 HWI-ST1234:55:C1DBHACXX:3:1304:15619:72405 length=101 has more read characters than quality values.
+terminate called after throwing an instance of 'int'
+(ERR): hisat2-align died with signal 6 (ABRT) (core dumped)
+＃不知为何报错，查资料暂无结果
+Multiseed full-index search: 00:22:52
+10853272 reads; of these:
+  10853272 (100.00%) were paired; of these:
+    769471 (7.09%) aligned concordantly 0 times
+    9622078 (88.66%) aligned concordantly exactly 1 time
+    461723 (4.25%) aligned concordantly >1 times
+    ----
+    769471 pairs aligned concordantly 0 times; of these:
+      159904 (20.78%) aligned discordantly 1 time
+    ----
+    609567 pairs aligned 0 times concordantly or discordantly; of these:
+      1219134 mates make up the pairs; of these:
+        803611 (65.92%) aligned 0 times
+        381855 (31.32%) aligned exactly 1 time
+        33668 (2.76%) aligned >1 times
+96.30% overall alignment rate
+Time searching: 00:22:53
+Overall time: 00:22:54
+Time loading forward index: 00:00:01
+Time loading reference: 00:00:00
+Multiseed full-index search: 00:25:42
+12511261 reads; of these:
+  12511261 (100.00%) were paired; of these:
+    717881 (5.74%) aligned concordantly 0 times
+    11222689 (89.70%) aligned concordantly exactly 1 time
+    570691 (4.56%) aligned concordantly >1 times
+    ----
+    717881 pairs aligned concordantly 0 times; of these:
+      145364 (20.25%) aligned discordantly 1 time
+    ----
+    572517 pairs aligned 0 times concordantly or discordantly; of these:
+      1145034 mates make up the pairs; of these:
+        747711 (65.30%) aligned 0 times
+        363967 (31.79%) aligned exactly 1 time
+        33356 (2.91%) aligned >1 times
+97.01% overall alignment rate
+Time searching: 00:25:42
+Overall time: 00:25:44
+Time loading forward index: 00:00:01
+Time loading reference: 00:00:00
+Multiseed full-index search: 00:23:37
+11960491 reads; of these:
+  11960491 (100.00%) were paired; of these:
+    713785 (5.97%) aligned concordantly 0 times
+    10732745 (89.73%) aligned concordantly exactly 1 time
+    513961 (4.30%) aligned concordantly >1 times
+    ----
+    713785 pairs aligned concordantly 0 times; of these:
+      133402 (18.69%) aligned discordantly 1 time
+    ----
+    580383 pairs aligned 0 times concordantly or discordantly; of these:
+      1160766 mates make up the pairs; of these:
+        748271 (64.46%) aligned 0 times
+        380044 (32.74%) aligned exactly 1 time
+        32451 (2.80%) aligned >1 times
+96.87% overall alignment rate
+＃后面三个正常
+
+
+
 
