@@ -195,7 +195,36 @@ Multiseed full-index search: 00:23:37
         32451 (2.80%) aligned >1 times
 96.87% overall alignment rate
 ＃后面三个正常
-
+2017.12.13日 #国家公祭日，哀悼南京大屠杀
+其实昨天就已经比对完所有数据了，除了SRR1592295.paired.fastq.gz有报错外，其余均正常。比对率在96%左右
+接下来是samtools储存转换数据。不过我发现报错了
+samtools:error while loading shared libraries: libbz2.so.1.0: cannot open shared object file: No such file or directory
+缺少libbz2.so.1.0因为用conda安装的，所以这个系统包没有装上，但是这个Centos系统需要用yum安装。
+后来我找柏锡老师要了超级用户，在超级用户下下载samtools-1.6 htslib-1.6 bcftools-1.6 下载入/home/xiongdongyan/src
+yum install gcc gcc-c++
+yum install gcc-gfortran
+yum install zlib-devel.i686
+yum install ncurses-devel ncurses-devel ncurses
+yum install bzip2-devel.x86_64
+yum install -y xz-devel
+yum install python-devel
+cd htslib-1.6
+make 
+make install
+cd samtools-1.6
+make
+make install
+bcftools-1.6
+make
+make install
+输入samtools就可以正确打开。
+cd /home/xiongdongyan/sra-data/过滤后数据/过滤后质控/aligned
+for i in `seq 295 309`
+do
+samtools view -S SRR1592${i}_sam -b > SRR1592${i}.bam
+samtools sort SRR1592${i}.bam -o SRR1592${i}_sorted.bam
+samtools index SRR1592${i}_sorted.bam
+done
 
 
 
