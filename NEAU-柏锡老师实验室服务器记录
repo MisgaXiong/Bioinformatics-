@@ -225,6 +225,38 @@ samtools view -S SRR1592${i}_sam -b > SRR1592${i}.bam
 samtools sort SRR1592${i}.bam -o SRR1592${i}_sorted.bam
 samtools index SRR1592${i}_sorted.bam
 done
+#数据转储完后，试试
+我提取SRR1592296.sam的前１００００行数据作为测试
+head -10000 SRR1592296.sam > ana.sam
+samtools view -b ana.sam > ana.bam #-b 输出.bam文件
+samtools view test.bam | head
+
+samtools sort test.bam > default.bam #按照默认排列，默认排列是按照染色体排列
+samtools sort -n test.bam > sorted_left.bam #按照reads排列。
+samtools view xxx.bam | head
+
+samtools view SRR1592296_sorted.bam (chr)1:236-123456 | head ＃按照染色体区域查看
+
+samtools flagstat SRR1592296_sorted.bam #查看总体情况，结果会显示映射率，正确比对率等等
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
