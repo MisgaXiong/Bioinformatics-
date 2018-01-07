@@ -251,9 +251,12 @@ samtools view -S SRR1592${i}_sam -b > SRR1592${i}.bam
 samtools sort -n SRR1592${i}.bam -o SRR1592${i}_nsorted.bam
 samtools view -h SRR1592${i}_nsorted.bam > SRR1592${i}_nsorted.sam
 done
-
-
-
+计数要使用gff3文件
+进入gff3文件所在路径
+for i in `seq 295 309`s
+do
+htseq-count -s no -i exon_id　~/sra-data/过滤后数据/过滤后质控/aligned/SRR1592${i}_nsorted.sam. ~/sra-data/过滤后数据/index/Glycine_max.gff3
+done
 
 
 
