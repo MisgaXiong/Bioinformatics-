@@ -243,7 +243,14 @@ samtools flagstat SRR1592296_sorted.bam #查看总体情况，结果会显示映
 关于reads计数，我在服务器上想了另外一个方法。由于在使用HTSeq计数的时候报错缺少libbz2包，安装这个包又需要root权限，老师也没有让安装，不过我想起来
 曾经在老师的root账号上用conda安装了samtools（因为我在自己用户下使用samtools也报错缺少libbz2包，所以我想到还是在用老师的root权限下用samtools把
 排序好的bam文件转成sam。再用HTSeq计数。后来这个想法成功实现。
+另外计数的时候要用安装读段名称排序的文件计数，而之前用的是默认排序即染色体
 
+for i in `seq 295 309`
+do
+samtools view -S SRR1592${i}_sam -b > SRR1592${i}.bam
+samtools sort -n SRR1592${i}.bam -o SRR1592${i}_nsorted.bam
+samtools view -h SRR1592${i}_nsorted.bam > SRR1592${i}_nsorted.sam
+done
 
 
 
