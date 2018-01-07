@@ -255,8 +255,27 @@ done
 进入gff3文件所在路径
 for i in `seq 295 309`s
 do
-htseq-count -s no -i exon_id　~/sra-data/过滤后数据/过滤后质控/aligned/SRR1592${i}_nsorted.sam. ~/sra-data/过滤后数据/index/Glycine_max.gff3
+htseq-count -s no -i exon_id　~/sra-data/过滤后数据/过滤后质控/aligned/SRR1592${i}_nsorted.sam. ~/sra-data/过滤后数据/index/Glycine_max.gff3 > ~/sra-data/过滤后数据/index/SRR1592${i}.count
 done
+把文件传输到个人终端，打开R合并表达文件，在NCBI数据库中查到296,297是V3时期的表达数据，其余均为V3时期后的基因表达数据，我们将V3时期设置为对照。其余为实验组。
+options(stringsAsFactors = FALSE)
+con1<-read.table("SRR1592296.count",sep ="\t",col.names = c("gene_id","V3_Stage"))
+con2<-read.table("SRR1592297.count",sep ="\t",col.names = c("gene_id","V3_Stage"))
+rep1<-read.table("SRR1592298.count",sep ="\t",col.names = c("gene_id","2_weeks_after_V3"))
+rep2<-read.table("SRR1592299.count",sep ="\t",col.names = c("gene_id","2_weeks_after_V3"))
+rep3<-read.table("SRR1592300.count",sep ="\t",col.names = c("gene_id","2_weeks_after_V3"))
+rep4<-read.table("SRR1592301.count",sep ="\t",col.names = c("gene_id","4_weeks_after_V3"))
+rep5<-read.table("SRR1592302.count",sep ="\t",col.names = c("gene_id","4_weeks_after_V3"))
+rep6<-read.table("SRR1592303.count",sep ="\t",col.names = c("gene_id","4_weeks_after_V3"))
+rep7<-read.table("SRR1592304.count",sep ="\t",col.names = c("gene_id","6_weeks_after_V3"))
+rep8<-read.table("SRR1592305.count",sep ="\t",col.names = c("gene_id","6_weeks_after_V3"))
+rep9<-read.table("SRR1592306.count",sep ="\t",col.names = c("gene_id","6_weeks_after_V3"))
+rep10<-read.table("SRR1592307.count",sep ="\t",col.names = c("gene_id","7_weeks_after_V3"))
+rep11<-read.table("SRR1592308.count",sep ="\t",col.names = c("gene_id","7_weeks_after_V3"))
+rep12<-read.table("SRR1592309.count",sep ="\t",col.names = c("gene_id","7_weeks_after_V3"))
+raw_count<-merge(merge(con1,con2,rep1,rep2,rep3,rep4,rep5,by="gene_id"),merge(rep6,rep7,rep8,rep9,rep10,rep11,rep12,by="gene_id"))
+write.table(raw_count,file="raw_count.xls",sep="\t",quote=F）
+全套RNAseq流程完毕。剩下为差异基因表达分析。
 
 
 
