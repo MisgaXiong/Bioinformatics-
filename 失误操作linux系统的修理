@@ -1,0 +1,10 @@
+几天前，在教学生Linux基本操作时。为了教会学生在linux系统中找到特定文件并执行移动操作，我在自己Linux终端输入了以下命令
+find . -name 'count*' -exec mv -t /home/xdy1995 {} \;
+结果，没有想到我的HTSeq中恰好有名为count.的５个文件被移动了。因为当时教课匆忙没有注意，后来在使用HTSeq时发生报错
+Traceback (most recent call last):
+  File "/home/xdy1995/miniconda2/bin/htseq-count", line 3, in <module>
+    import HTSeq.scripts.count
+ImportError: No module named count
+然后查看HTSeq的路径下文件，回忆才发现当时的失误操作导致了重要文件被移动。最后将５个文件还原至原路径
+~/miniconda2/lib/python2.7/site-packages/HTSeq/scripts
+教训，以后用正则表达式移动文件时一定要注意！
