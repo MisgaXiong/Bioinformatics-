@@ -1,0 +1,7 @@
+#BWA安装：BWA软件安装需要和SAMtools软件安装同样的前置包，BWA软件用于比对。
+#从bwa官网下载新版bwa-0.7.17
+tar -xjvf bwa-0.7.17.tar.bz2
+cd bwa-0.7.17
+make
+echo 'PATH=$PATH:~/biosoft/bwa-0.7.17' >> ~/.bashrc
+source ~/.bashrc
