@@ -44,5 +44,30 @@ Reads mapped in proper pairs:           20796620
 Proper-paired reads map to different chrom:0
 #使用RSeQC评估排序后的bam文件质量
 
-  
-  
+#bedtools安装
+wget https://github.com/arq5x/bedtools2/archive/v2.25.0.tar.gz
+tar -xzvf v2.25.0.tar.gz
+cd bedtools2-2.25.0/
+make
+cd bin/
+echo 'PATH=$PATH:~/biosoft/bedtools2-2.25.0/bin' >> ~/.bashrc
+source ~/.bashrc
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
