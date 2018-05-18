@@ -5,3 +5,44 @@ cd bwa-0.7.17
 make
 echo 'PATH=$PATH:~/biosoft/bwa-0.7.17' >> ~/.bashrc
 source ~/.bashrc
+
+＃RSeQC安装：RSeQC包中包含许多.py脚本，适合用于对RNAseq数据的质量进行评估，RSeQC安装用pip安装
+pip install RSeQC
+#如果出现报错You are using pip version 9.0.1, however version 10.0.1 is available.则
+pip install --upgrade pip
+#如果出现报错gcc -pthread -B /home/xdy1995/miniconda2/compiler_compat -Wl,
+--sysroot=/ -fno-strict-aliasing -g -O2 -DNDEBUG -g -fwrapv -O3 
+-Wall -Wstrict-prototypes -fPIC -I/usr/include/lzo 
+-I/home/xdy1995/miniconda2/include/python2.7 -c lzomodule.c -o build/temp.linux-x86_64-2.7/lzomodule.o
+  lzomodule.c:35:19: fatal error: lzo1x.h: 没有那个文件或目录
+  compilation terminated.
+  error: command 'gcc' failed with exit status 1#则
+sudo apt-get install liblzo2-dev
+#完成后
+pip install RSeQC#成功安装
+bam_stat.py -i SRR1592309.nsorted.bam
+#==================================================
+#All numbers are READ count
+#==================================================
+
+Total records:                          25084082
+
+QC failed:                              0
+Optical/PCR duplicate:                  0
+Non primary hits                        1599982
+Unmapped reads:                         717386
+mapq < mapq_cut (non-unique):           875250
+
+mapq >= mapq_cut (unique):              21891464
+Read-1:                                 10945859
+Read-2:                                 10945605
+Reads map to '+':                       10934089
+Reads map to '-':                       10957375
+Non-splice reads:                       15269029
+Splice reads:                           6622435
+Reads mapped in proper pairs:           20796620
+Proper-paired reads map to different chrom:0
+#使用RSeQC评估排序后的bam文件质量
+
+  
+  
