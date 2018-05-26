@@ -1,0 +1,73 @@
+#最近两天尝试在非root权限下编译某些需要root权限的软件，考虑到以后可能经常遇到这种情况就直接开始在自己的权限下安装gcc。
+#非root权限用户无法对根目录/下的usr、bin、etc等文件进行可写操作。同时也不能使用apt或者yum等包管理器下载包。
+wget https://mirrors.tuna.tsinghua.edu.cn/gnu/gcc/gcc-7.2.0/gcc-7.2.0.tar.gz
+tar -zxvf gcc-7.2.0.tar.gz && cd gcc-7.2.0
+#编译安装gcc需要gmp、mpfr、mpc等依赖包
+./contrib/download_prerequisites（需要cd进入gcc-7.2.0下）
+或者在上一层文件夹中下载
+wget ftp://gcc.gnu.org/pub/gcc/infrastructure/gmp-6.1.0.tar.bz2 
+tar -jxvf gmp-6.1.0.tar.bz2 && mv gmp-6.1.0 gcc-7.2.0/gmp
+
+wget ftp://gcc.gnu.org/pub/gcc/infrastructure/isl-0.18.tar.bz2
+tar -jxvf isl-0.18.tar.bz2 && mv isl-0.18 gcc-7.2.0/isl
+
+wget ftp://gcc.gnu.org/pub/gcc/infrastructure/mpfr-3.1.4.tar.bz2
+tar -jxvf mpfr-3.1.4.tar.bz2 && mv mpfr-3.1.4 gcc-7.2.0/mpfr
+
+wget ftp://gcc.gnu.org/pub/gcc/infrastructure/mpc-1.0.3.tar.gz
+tar -zxvf mpc-1.0.3.tar.gz && mv mpc-1.0.3 gcc-7.2.0/mpc
+
+#编译gcc，在独立于gcc源码文件新建一个build文件夹。（例如我的gcc源码文件夹在src文件夹下，我的build文件夹也在这个文件夹中与gcc源码文件夹独立）
+../configure --prefix=$HOME/usr --enable-threads=posix --disable-multilib
+#其中--prefix=$HOME/usr是预安装路径，因为我的用户目录是/home/xiongdongyan，我在我的权限下新建目录usr即我的gcc安装目录，所以
+路径是/home/xiongdongyan/usr，--enable-threads=posix使用POSIX/Unix98作为线程支持库，另外配置时为了保证正确配置且完整，
+可以加上--disable-bootstrap，--disable-multilib是取消32位版本编译，因为我用的是64位的
+
+make -j8 #选择8核进行make，需要较长时间，但是和1核make相比已经大大缩短
+make install
+
+输入$HOME/usr/bin/gcc -v和输入gcc -v就可以分别查看新旧版本gcc
+在新gcc下非root权限编译安装软件则为./configure --prefix=$HOME/usr && make && make install
+#在徐州更的资料中解释了这三步的意义，使用./configure是检查gcc版本和编译所需工具，如果需要头文件则默认去/usr/include找，如果涉及动态编译库
+则去/usr/lib或者/usr/lib64去找
+
+在安装之前需要先声明几个环境变量，可以直接添加在配置文件中。
+export CFLAGS=" -fPIC"
+export CXXFLAGS=" -fPIC"
+export CPPFLAGS="-I$HOME/usr/include -I$HOME/usr/include/ncurses -I$HOME/usr/include/X11"
+export LDFLAGS="-L$HOME/usr/lib -L$HOME/usr/lib64"
+export LD_LIBRARY_PATH=$HOME/usr/lib:$HOME/usr/lib64
+export PKG_CONFIG_PATH=$HOME/usr/lib/pkgconfig:$HOME/usr/share/pkgconfig
+#尝试安装软件
+wget ftp://ftp.invisible-island.net/ncurses/ncurses.tar.gz && tar -zxvf ncurses.tar.gz
+./configure --enable-shared --prefix=$HOME/usr
+make && make install
+
+wget http://www.zlib.net/zlib-1.2.11.tar.gz
+tar -zxvf zlib-1.2.11.tar.gz && cd zlib-1.2.11 && ./configure --prefix=$HOME/usr && make && make install
+
+wget https://tukaani.org/xz/xz-5.2.3.tar.gz
+tar -zxvf xz-5.2.3.tar.gz && cd xz-5.2.3 && ./configure --prefix=$HOME/usr && make && make install
+
+wget http://www.bzip.org/1.0.6/bzip2-1.0.6.tar.gz
+tar -zxvf bzip2-1.0.6.tar.gz && cd bzip2-1.0.6 && ./configure --prefix=$HOME/usr && make && make install
+#但是我在编译安装bzip2的时候出错了，报错
+./configure Error:No such file or directory
+我一查看是因为bzip2源码下没有configure文件，只有makefile、Makefile-libbz2_so文件，输入
+make -f Makefile-libbz2_so
+make install PRIFIX=$HOME/usr
+依然报错，感觉还是在自动写入系统文件。
+之后我暂时没有管，去安装了htslib-1.5，samtools-1.8安装方法均为./configure --prefix=$HOME/usr && make && make install
+然后依然打不开samtools
+samtools: error while loading shared libraries: libbz2.so.1.0: cannot open share d object file: No such file or directory
+原来是没有libbz2.so.1.0。我下载了bzip2-libs的rpm文件
+rpm -qpl bzip2-libs-1.0.5-7.el6_0.i686.rpm
+/lib/libbz2.so.1
+/lib/libbz2.so.1.0.4
+原来这个是预安装到这两个系统路径下，我强行指定安装路径
+rpm -ivh --relocate /usr/lib=/home/xiongdongyan/usr/lib bzip2-libs-1.0.5-7.el6_0.i686.rpm
+error: can't create transaction lock on /var/lib/rpm/.rpm.lock (Permission denie d)
+我才发现rpm文件会自动向系统路径下写入文件，由于不是root用户，导致报错。
+后来想写软连接，但是一直没有libbz2.so.1.0文件也不行，另外软连接也无法写入系统路径，因为软连接完成后在任何一个路径下更改
+则原文件都被更改。至此，以后继续再解决这个遗留问题。
+
