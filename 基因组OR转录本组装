@@ -1,0 +1,53 @@
+#使用Trinity组装基因组或者转录本
+#Trinity的正确运行前提条件要安装以下软件：
+#1.samtools 安装教程可以查看我的github教程：https://github.com/MisgaXiong/Bioinformatics-/blob/master/RNAseq软件安装
+
+#2.jellyfish
+wget https://github.com/gmarcais/Jellyfish/releases/download/v2.2.10/jellyfish-2.2.10.tar.gz
+tar -zxvf jellyfish-2.2.10.tar.gz
+cd jellyfish-2.2.10
+./configure --prefix=$HOME
+make -j8
+make install
+echo 'PATH=$PATH:~/src/jellyfish-2.2.10/bin' >> ~/.bashrc
+source ~/.bashrc
+#在安装v2版本前我安装的是v1.1.12版本。后来Trinity报错显示需要v2版本。我就安装了v2并从bashrc中删除了v1版本环境变量
+vim ~/.bashrc
+I
+删除
+Esc
+CapsLock
+ZZ
+
+#3.bowtie2
+#download from: https://sourceforge.net/projects/bowtie-bio/files/bowtie2/2.3.4.1 
+unzip bowtie2-2.3.4.1-source.zip
+cd bowtie2-2.3.4.1
+make NO_TBB=1
+chmod 777 bowtie2
+./bowtie2
+echo 'PATH=$PATH:~/src/bowtie2-2.3.4.1' >> ~/.bashrc
+source ~/.bashrc
+
+#4.salmon
+wget https://github.com/COMBINE-lab/salmon/archive/v0.10.2.tar.gz
+tar -zxvf v0.10.2.tar.gz && cd salmon-0.10.2
+mkdir build && cd bulid
+cmake -DFETCH_BOOST=TRUE ..
+make
+make install
+echo 'PATH=$PATH:~/src/salmon-0.10.2/bin' >> ~/.bashrc
+source ~/.bashrc
+echo 'LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/src/salmon-0.10.2/lib' >> ~/.bashrc
+source ~/.bashrc
+
+#5.Trinity
+wget https://github.com/trinityrnaseq/trinityrnaseq/archive/Trinity-v2.6.5.tar.gz
+tar -zxvf Trinity-v2.6.5.tar.gz && cd Trinity-v2.6.5
+make
+echo 'PATH=$PATH:~/src/trinityrnaseq-Trinity-v2.6.5' >> ~/.bashrc
+source ~/.bashrc
+
+#数据准备
+fastq-dump --defline-seq '@$sn[_$rn]/$ri' --split-files -O ~/virus/test -A SRR6291305.sra
+
