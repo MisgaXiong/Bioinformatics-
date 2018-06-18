@@ -53,9 +53,16 @@ cd bin/
 echo 'PATH=$PATH:~/biosoft/bedtools2-2.25.0/bin' >> ~/.bashrc
 source ~/.bashrc
 
-
-
-
+#hmmer安装
+wget http://eddylab.org/software/hmmer/hmmer-3.2.tar.gz
+tar -zxf hmmer-3.2.tar.gz
+cd hmmer-3.2
+./configure --prefix=$HOME #因为在服务器上安装，本人在服务器上无root权限，将软件安装在我有权限的路径下
+make
+make check
+make install
+echo 'PATH=$PATH:~/src/hmmer-3.2' >> ~/.bashrc
+source ~/.bashrc
 
 
 
