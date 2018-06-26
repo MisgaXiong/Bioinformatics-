@@ -52,11 +52,8 @@ source ~/.bashrc
 fastq-dump --defline-seq '@$sn[_$rn]/$ri' --split-files -O ~/virus/test -A SRR6291305.sra
 
 #Trinity组装转录本
-for i in echo *.fastq
-do
-Trinity --max_memorey 14G -right reads_1.fastq -left reads_2.fastq --JM 14G --default T --Butterfly 50G --FR -O ~/sra-data
-/virus/virus_data/Trinity_transcriptome
-done
+Trinity --seqType fq --max_memory 14G --left SRR6291305_1.fastq  --right SRR6291305_2.fastq --SS_lib_type FR 
+--output transcriptome_virus --CPU 12 --jaccard_clip --inchworm_cpu 12 --group_pairs_distance 500 --bflyCPU 12
 
 
 
