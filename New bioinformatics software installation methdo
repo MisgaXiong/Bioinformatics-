@@ -64,9 +64,13 @@ make install
 echo 'PATH=$PATH:~/src/hmmer-3.2' >> ~/.bashrc
 source ~/.bashrc
 
-
-
-
+#安装bioperl
+perl -MCPAN -e shell
+cpan>install Bundle::CPAN #如果没有CPAN, 则安装
+cpan>install Module::Build
+cpan>o conf prefer_installer MB
+cpan>o conf commit　＃升级CPAN
+cpan>install Bio::SeqIO #安装bio::SeqIO
 
 
 
