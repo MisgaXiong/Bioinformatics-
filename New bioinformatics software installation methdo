@@ -72,8 +72,14 @@ cpan>o conf prefer_installer MB
 cpan>o conf commit　＃升级CPAN
 cpan>install Bio::SeqIO #安装bio::SeqIO
 
-
-
+＃clustalw2安装
+wget ftp://ftp.ebi.ac.uk/pub/software/clustalw2/2.0.12/clustalw-2.0.12.tar.gz
+tar -zxvf clustalw-2.0.12.tar.gz && cd clustalw-2.0.12
+./configure --prefix=$HOME
+make
+make install
+echo 'PATH=$PATH:~/biosoft/clustalw-2.0.12' >> ~/.bashrc
+source ~/.bashrc
 
 
 
