@@ -133,3 +133,5 @@ python
 #退出
 pip install HTSeq
 #自动下载numpy matplotlib
+sudo -H python -m pip install --upgrade pip #上面不好用用以下
+sudo -H python -m pip install HTSeq
