@@ -81,10 +81,15 @@ make install
 echo 'PATH=$PATH:~/biosoft/clustalw-2.0.12' >> ~/.bashrc
 source ~/.bashrc
 
-
-
-
-
-
+#RAxML安装
+git clone https://github.com/stamatak/standard-RAxML
+make -f Makefile.gcc
+rm *.o
+make -f Makefile.SSE3.gcc
+rm *.o
+make -f Makefile.AVX.gcc
+rm *.o
+echo 'PATH=$PATH:~/src/standard-RAxML' >> ~/.bashrc
+source ~/.bashrc
 
 
