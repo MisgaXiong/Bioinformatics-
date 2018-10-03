@@ -1,0 +1,34 @@
+#需要使用的软件
+FastQC, Trimmomatic, FLASH, megahit, bowtie2/bwa/hisat2, samtools, bedtools, Metaphlan2, kraken, Prokka, MaxBin, FragGeneScan
+idba, Metabat
+#原理介绍:宏基因组总体分为基于16S/18S或ITS测序分析或基于denovo的测序分析。前者主要用于微生物的多样性、鉴定分析。后者主要用于病毒、未知微生物的分析。
+通常情况下，病毒的宏基因组分析也叫宏病毒组。宏基因组分析流程大致为：将数据质控过滤后，去除宿主基因组（环境样本不用去除），再根据overlap或者contigs拼接
+将拼接的序列进行去冗余或者去嵌合体分析，构建基因集合。再将冗余的原始reads比对至非冗余基因集合，确定丰度信息。最后将组装的长序列结合丰度信息进行物种鉴定。
+#软件安装：
+1.Maxbin
+curl  https://downloads.jbei.org/data/microbial_communities/MaxBin/getfile.php?MaxBin-2.2.2.tar.gz > MaxBin-2.2.2.tar.gz
+tar -xzvf MaxBin-2.2.2.tar.gz
+cd MaxBin-2.2.2/src
+make
+echo 'PATH=$PATH:~/softwar/MaxBin-2.2.2' >> ~/.bashrc
+source ~/.bashrc
+
+2.FragGeneScan
+git clone https://github.com/COL-IU/FragGeneScan.git
+cd FragGeneScan
+make clean
+make fgs
+echo 'PATH=$PATH:~/softwar/FragGeneScan' >> ~/.bashrc
+source ~/.bashrc
+
+3.idba
+git clone https://github.com/loneknightpy/idba.git
+cd idba
+./build.sh
+echo 'PATH=$PATH:~/softwar/idba/bin' >> ~/.bashrc
+source ~/.bashrc
+
+4.Metabat2
+conda install -c ursky metabat2
+
+分析流程
