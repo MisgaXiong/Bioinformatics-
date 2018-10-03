@@ -31,4 +31,20 @@ source ~/.bashrc
 4.Metabat2
 conda install -c ursky metabat2
 
-分析流程
+#分析流程
+本次采用联合国分析项目中的５个汉堡宏基因组测序数据为例子。目的是鉴定是否存在要求的30多中细菌。拿到fastq测序数据
+1.直接使用Trimmomatic过滤低质量数据
+for i in `seq 1 5`
+do 
+java -jar ~/softwar/Trimmomatic-0.38/trimmomatic-0.38.jar PE -threads 12 -phred33 
+PT2-00${i}_R1.fq.gz PT2-00${i}_R2.fq.gz PT2-00${i}_1_paired.fastq.gz PT2-00${i}_1_unpaired.fastq.gz 
+PT2-00${i}_2_paired.fastq.gz PT2-00${i}_2_unpaired.fastq.gz 
+ILLUMINACLIP:~/softwar/Trimmomatic-0.38/adapters/TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:51
+done
+
+2.将过滤好的数据使用megahit拼接contigs#由于是环境样本，其中不存在宿主基因组，所以不用过滤宿主基因组
+for i in `seq 1 5`
+do
+megahit -1 PT2-00${i}_1_paired.fastq.gz -2 PT2-00${i}_2_paired.fastq.gz -o Burger${i}
+done
+
