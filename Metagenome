@@ -72,7 +72,7 @@ bam2fastq --unaligned unmap_014_Spinach.bam -o Spinach#.fastq
 ＃Spinach#.fastq中的#代表输出的是双端测序fastq数据(由于原始测序数据是双端测序)
 综上，我们得到了去掉宿主基因组的fastq文件，后续的操作重复２中的megahit拼接流程。
 
-3.Binning前的准备
+3.Binning分析
 3.1 Binning原理介绍
 前面，我们根据contigs拼接到得到了较长序列的数据，但是这些序列是杂乱的，我们无法区分哪些序列来自于同一细菌或病毒，Binning的目的在于将这些杂乱的
 序列通过聚类的方法分类为一个细菌或病毒一组序列。就好像乐高玩具中把不同颜色的单元按照颜色分类至一起。对于细菌或者病毒的分类通常基于核酸使用频率、G
