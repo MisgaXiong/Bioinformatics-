@@ -45,6 +45,84 @@ done
 2.将过滤好的数据使用megahit拼接contigs#由于是环境样本，其中不存在宿主基因组，所以不用过滤宿主基因组
 for i in `seq 1 5`
 do
-megahit -1 PT2-00${i}_1_paired.fastq.gz -2 PT2-00${i}_2_paired.fastq.gz -o Burger${i}
+megahit -t 24 -m 0.5 -1 PT2-00${i}_1_paired.fastq.gz -2 PT2-00${i}_2_paired.fastq.gz -o Burger${i}
 done
+
+如果样本是诸如肠道、血液等宏基因组测序数据，需要过滤宿主基因组。以本项目中的Spinach宏基因组测序样本为例
+在NCBI的Genome中下载Spinach的基因组序列
+wget ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/002/007/265/GCF_002007265.1_ASM200726v1/GCF_002007265.1_ASM200726v1_genomic.fna.gz
+gzip -d GCF_002007265.1_ASM200726v1_genomic.fna.gz #解压
+mv GCF_002007265.1_ASM200726v1_genomic.fna Spinach_genomic.fna　＃重命名
+接下来需要对该基因组建立索引，用于比对reads至基因组索引。比对的软件较多，bwa, bowtie, hisat2均可。
+以bwa为例：
+bwa index Spinach_genomic.fna　#建立索引,生成带有Spinach_genomic.fna前缀的索引文件
+for i in `seq 13 14`
+do
+bwa mem Spinach_genomic.fna　PT2-0${i}_1_paired.fastq.gz PT2-0${i}_2_paired.fastq.gz > map_0${i}_Spinach.sam
+done
+输出的.sam文件中包含了比对的所有信息，我们可以根据.sam文件的信息提取出未比对上的序列，由于sam文件的储存空间大，需要将sam转化为bam加快分析
+for i in `seq 13 14`
+do 
+samtools view -b map_0${i}_Spinach.sam > map_0${i}_Spinach.bam　
+samtools view -b -f 4 map_0${i}_Spinach.bam > unmap_0${i}_Spinach.bam
+done
+# -f 4代表获得未比对上的序列，如果要提取比对上的序列用-F 4，另外数字４用于paird end测序，数字把用于mate paird测序
+提取出未比对上的reads的bam文件后，需要将bam文件中的fastq格式文件,使用bam2fastq软件提取fastq格式数据
+bam2fastq --unaligned unmap_014_Spinach.bam -o Spinach#.fastq
+＃Spinach#.fastq中的#代表输出的是双端测序fastq数据(由于原始测序数据是双端测序)
+综上，我们得到了去掉宿主基因组的fastq文件，后续的操作重复２中的megahit拼接流程。
+
+3.Binning前的准备
+3.1 Binning原理介绍
+前面，我们根据contigs拼接到得到了较长序列的数据，但是这些序列是杂乱的，我们无法区分哪些序列来自于同一细菌或病毒，Binning的目的在于将这些杂乱的
+序列通过聚类的方法分类为一个细菌或病毒一组序列。就好像乐高玩具中把不同颜色的单元按照颜色分类至一起。对于细菌或者病毒的分类通常基于核酸使用频率、G
+C含量、或者序列分布的丰度信息进行分类。简要阐明：不同的细菌或者病毒四种碱基的使用频率或者GC含量是不一样的，根据序列的４碱基使用频率和GC含量的相似
+性可以将不同的序列分类到一个细菌或者病毒中。另外，相关文献中说明对于不同的样本，微生物分布的丰度不同，从而导致基因的丰度不同，反之，根据序列的丰度差
+异可以将不同序列分类至一个细菌或病毒。通常情况下，前者方法更适合于长序列的分析。我们已经组装了相对较长的序列。所以可以通过将该拼接的序列信息建立索引，
+进而将reads再次比对至拼接序列的索引，统计丰度信息．最后，通过该丰度信息将拼接的序列进行分类。
+
+3.2 丰度信息的统计
+bwa index Spinach.final.contigs.fa
+bwa mem Spinach.final.contigs.fa Spinach_1.fastq Spinach_2.fastq > Spinach.sam
+samtools view -b Spinach.sam > Spinach.bam
+samtools -b sort Spinach.bam > Spinach.sorted.bam #排序
+genomeCoverageBed -ibam Spinach.sorted.bam > Spinach.histogram.tab　＃使用bedtools统计reads比对上索引的丰度信息
+wget https://raw.githubusercontent.com/ngs-docs/2017-cicese-metagenomics/master/files/calculate-contig-coverage.py
+python calculate-contig-coverage.py Spinach.histogram.tab #使用下载的脚本对于序列进行定量
+ls Spinach.histogram.tab.coverage.tab > Spinach_abundance.list #将定量后的丰度信息文件名传递至列表格式文件中
+
+3.3 Binning
+~/softwar/MaxBin-2.2.2/run_MaxBin.pl -contig Spinach.final.contigs.fa -abund_list Spinach_abundance.list -max_iteration 5
+-out Spinach_Maxbin #使用MaxBin中的perl脚本将拼接的序列结合丰度信息文件进行分析依据丰度信息分类序列，将预测的bins序列以不同的fasta文件输出
+
+for file in Spinach_Maxbin.*.fasta
+do
+num=${file//[!0-9]/}
+sed -e "/^>/ s/$/ ${num}/" Spinach_Maxbin.$num.fasta >> Spinach_Maxbin_binned.concat.fasta
+done #将不同的bins进行合并
+
+#生成可视化的列表用VizBin软件打开可视化
+echo label > Spinach_Maxbin_annotation.list
+grep ">" Spinach_Maxbin_binned.concat.fasta |cut -f2 -d ' '>> Spinach_Maxbin_annotation.list
+
+＃VizBin安装
+sudo apt-get install libatlas3-base libopenblas-base default-jre
+curl -L https://github.com/claczny/VizBin/blob/master/VizBin-dist.jar?raw=true > VizBin-dist.jar
+
+3.4 初步鉴定细菌或病毒
+update_blastdb.pl nt nr　＃更新本地blast的核酸及蛋白库
+blastn -query Spinach_Maxbin_binned.concat.fasta -db ~/softwar/ncbi-blast-2.7.1+/bin/nt 
+-nums_threads 30 -max_target_seqs 3 -out Spinach.blast
+
+
+
+
+
+
+
+
+
+
+
+
 
