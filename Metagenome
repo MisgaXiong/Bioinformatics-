@@ -115,8 +115,58 @@ blastn -query Spinach_Maxbin_binned.concat.fasta -db ~/softwar/ncbi-blast-2.7.1+
 -nums_threads 30 -max_target_seqs 3 -out Spinach.blast
 
 
-
-
+diamond输出m8格式的本地blastp的比对结果，用awk命令提取第二列蛋白id进行爬虫注释可视化
+#爬虫-宏基因组注释
+#1.网页批量爬取蛋白信息
+library(rvest)
+myid<-read.table("protein_seq.txt")
+myAnno<-NULL
+for (i in 1:nrow(myid)) {
+  seqid<-myid[i,1]
+  url<-paste("https://www.ncbi.nlm.nih.gov/protein/",seqid,sep = "")
+  Info<-read_html(url)
+  inf<-Info%>%
+    html_nodes(css = "#maincontent h1")%>%
+    html_text()
+  myAnno<-c(myAnno,inf)
+}
+#2.正则表达式提取物种信息
+myAnno2<-NULL
+for (i in 1:length(myAnno)) {
+  part<-strsplit(myAnno[i],"")
+  for (j in 1:nchar(myAnno[i])) {
+    if(part[[1]][j]=="["){
+      myAnno2<-c(myAnno2,substring(myAnno[i],first = j+1,last = (nchar(myAnno[i])-1)))}
+    else{myAnno2<-myAnno2}
+  }
+}
+#3.统计物种数量
+#把同一物种的不同株系合并为同一物种
+TotalAnno<-NULL
+for (i in 1:length(myAnno2)) {
+  TotalAnno<-c(TotalAnno,paste(strsplit(myAnno2[i]," ")[[1]][1],strsplit(myAnno2[i]," ")[[1]][2],sep = " "))
+}
+TotalAnno<-TotalAnno[na.rm=TRUE]
+#正式统计
+Spesta<-list()
+for (i in 1:length(TotalAnno)) {
+    Spe<-TotalAnno[i]
+    Spesta[[Spe]]<-c(Spesta[[Spe]],i)
+}
+Spenum<-data.frame()
+Speci<-as.vector(names(Spesta))
+for (j in 1:length(Speci)) {
+  Spenum[j,1]<-Speci[j]
+  Spenum[j,2]<-length(Spesta[[j]])
+}
+#4.可视化
+#词云可视化
+library(wordcloud2)
+wordcloud2(Spenum)
+#ggplot2可视化
+library(ggplot2)
+p<-ggplot(Spenum,mapping=aes(x=Spenum[,1],y=Spenum[,2],fill=Spenum[,2]))+geom_bar(stat = "identity")
+p<-p+theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
 
 
 
