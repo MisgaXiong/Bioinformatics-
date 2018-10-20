@@ -167,7 +167,45 @@ wordcloud2(Spenum)
 library(ggplot2)
 p<-ggplot(Spenum,mapping=aes(x=Spenum[,1],y=Spenum[,2],fill=Spenum[,2]))+geom_bar(stat = "identity")
 p<-p+theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.5))
-
+#5.个性化分析
+#5.1多样本共同菌种差异分析
+#共同菌种提取
+commSpe<-NULL
+for (i in 1:nrow(myfish3num)) {
+  for (j in 1:nrow(myfish4num)) {
+    if(myfish3num[i,1]==myfish4num[j,1]){
+     commSpe<-c(commSpe,myfish3num[i,1],myfish3num[i,2],myfish4num[j,2])
+    }
+  }
+}
+commSpe<-matrix(commSpe,ncol = 3,byrow = T)
+commSpe<-as.data.frame(commSpe)
+write.table(commSpe,"Diffmicrobio.txt",sep = "\t")#用Excel打开更改一些格式
+#差异分析
+mySpe<-read.table("Diffmicrobio.txt",header = T,sep = "\t")
+mySpe<-as.matrix(mySpe)
+rownames(mySpe)<-mySpe[,1]
+mySpe<-mySpe[,2:ncol(mySpe)]
+dimnames<-list(rownames(mySpe),colnames(mySpe))
+mySpe<-matrix(as.numeric(as.matrix(mySpe)),nrow=nrow(mySpe),dimnames=dimnames(mySpe))
+#无重复数据差异分析
+library(edgeR)
+mygroup<-DGEList(counts = mySpe,group = 1:2)#传递列表
+mygroup<-calcNormFactors(mygroup)#标准化mygroup，使用TMM方法
+mygroup<-estimateCommonDisp(mygroup) #计算普通的离散度
+etgroup<-exactTest(mygroup,dispersion = 0.1^2)#检验差异
+results<-etgroup$table#输出显著性结果
+write.table(results,"菌种差异显著性.txt",sep="\t")
+topTags(etgroup,n=50)
+is.de<-decideTestsDGE(etgroup)
+plotMD(etgroup, status=is.de, values=c(1,-1), col=c("red","blue"),legend="topright")#对菌种差异度画图
+#热图
+Bacheatmap<-mygroup$counts
+library(pheatmap)
+mat<-Bacheatmap
+pheatmap(mat,scale="column",cluster_col=FALSE,border_color="grey60",fontsize = 10,
+         cellwidth=120,cellheight = 12,treeheight_row=80,main = "DiffBac",
+         color = colorRampPalette(c("navy", "white", "firebrick3"))(50))
 
 
 
