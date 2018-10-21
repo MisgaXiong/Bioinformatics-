@@ -181,6 +181,24 @@ for (i in 1:nrow(myfish3num)) {
 commSpe<-matrix(commSpe,ncol = 3,byrow = T)
 commSpe<-as.data.frame(commSpe)
 write.table(commSpe,"Diffmicrobio.txt",sep = "\t")#用Excel打开更改一些格式
+#独立菌种提取
+diffSpe<-NULL
+commNam<-commSpe[,1]
+z<-NULL
+for (i in 1:nrow(myfish3num)) {
+  if(myfish3num[i,1] %in% commNam){z<-z+1}
+  else{diffSpe<-c(diffSpe,myfish3num[i,1],myfish3num[i,2])}
+}
+diffSpe<-matrix(diffSpe,ncol = 2,byrow = T)
+colnames(diffSpe)<-c("Name","num")
+diffSpe2<-NULL
+x<-NULL
+for (j in 1:nrow(myfish4num)) {
+  if(myfish4num[j,1] %in% commNam){x<-x+1}
+  else{diffSpe2<-c(diffSpe2,myfish4num[j,1],myfish4num[j,2])}
+}
+diffSpe2<-matrix(diffSpe2,ncol = 2,byrow = T)
+colnames(diffSpe2)<-c("Name","num")
 #差异分析
 mySpe<-read.table("Diffmicrobio.txt",header = T,sep = "\t")
 mySpe<-as.matrix(mySpe)
