@@ -225,7 +225,36 @@ pheatmap(mat,scale="column",cluster_col=FALSE,border_color="grey60",fontsize = 1
          cellwidth=120,cellheight = 12,treeheight_row=80,main = "DiffBac",
          color = colorRampPalette(c("navy", "white", "firebrick3"))(50))
 
-
+#Krnoa数据预处理,将Kraken结果强行转化为Krona识别结果
+mykrna<-read.table("Burger2_kraken_report.txt",sep = "\t")
+mykrna<-as.matrix(mykrna)
+mykrona<-NULL
+krona<-NULL
+for (i in 1:nrow(mykrna)) {
+  b<-NULL
+  a<-NULL
+  c<-NULL
+  a<-strsplit(mykrna[i,1],"")
+  for (j in 1:(length(a$V1)-1)) {
+    if(a$V1[j]=="s" && a$V1[j+1]=="_"){
+      for (k in 1:length(a$V1)) {
+        b<-paste(b,a$V1[k],sep = "")
+      }
+    }
+    else{c<-c+1}
+  }
+  krona<-c(krona,b)
+}
+for (i in 1:length(krona)) {
+  for (j in 1:nrow(mykrna)) {
+    if(krona[i]==mykrna[j,1]){
+      mykrona<-c(mykrona,mykrna[j,2],krona[i])
+    }
+  }
+}
+mykrona<-matrix(mykrona,ncol = 2,byrow = T)
+mykrona<-as.data.frame(mykrona)
+write.table(mykrona,"Krona测试.txt",sep = "\t")
 
 
 
