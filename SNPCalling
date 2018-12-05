@@ -1,0 +1,8 @@
+#1.过滤后的fastq数据比对参考基因组后产生bam文件
+samtools view -b mapC092.sam > mapC092.bam
+#2.对参考基因组建立索引
+samtools faidx C092.fasta
+#3.对bam文件排序
+samtools sort mapC092.bam > mapC092sort.bam
+#4.搜集bam文件信息
+samtools mpileup -d 250 -gsf C092.fasta mapC092sort.bam -o mapC092sort.bcf
