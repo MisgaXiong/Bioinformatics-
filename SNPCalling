@@ -6,3 +6,7 @@ samtools faidx C092.fasta
 samtools sort mapC092.bam > mapC092sort.bam
 #4.搜集bam文件信息
 samtools mpileup -d 250 -gsf C092.fasta mapC092sort.bam -o mapC092sort.bcf
+#5.bcf格式转化为vcf格式
+bcftools view mapC092sort.bcf > mapC092sort.vcf
+#6.SNPcalling
+bcftools call -mv mapC092sort.vcf > mapC092sortSNPcall.vcf
