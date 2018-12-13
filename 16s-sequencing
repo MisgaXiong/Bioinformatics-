@@ -1,0 +1,25 @@
+#qiime2的安装
+#使用Miniconda3安装qiime2
+conda update conda
+conda install wget
+wget https://data.qiime2.org/distro/core/qiime2-2018.11-py35-linux-conda.yml
+conda env create -n qiime2-2018.11 --file qiime2-2018.11-py35-linux-conda.yml
+#如果下载因为时间太长报错，继续重复上面conda env这条代码，直到最后成功
+source activate qiime2-2018.11 #打开qiime2
+qiime --help #测试qiime2是否成功
+source deactivate
+#原始数据是联合国二轮的EN2的16s双端测序数据，放在Casava-paired-end-sequences文件夹下。
+#由于16s测序数据有三种格式，一种是"EMP protocol” multiplexed 的单双端格式，这种格式除了fastq文件外还需要barcode文件，
+一种是Cavasa 1.8 demultiplexed格式，这种格式不需要barcode文件，但是有
+1.the sample identifier,
+2.the barcode sequence or a barcode identifier,
+3.the lane number,
+4.the direction of the read (i.e. only R1, because these are single-end reads), and
+5.the set number.
+#数据导入
+qiime tools import --type 'SampleData[PairedEndSequencesWithQuality]' \
+--input-path ~/data/Casava-paired-end-sequences/ \
+--input-format CasavaOneEightSingleLanePerSampleDirFmt \
+--output-path EN216s_qiime2import_out-paired-end.qza
+#质控
+qiime demux summarize --i-data EN216s_qiime2import_out-paired-end.qza --o-visualization EN2_16s_qiime_demux_summary.qzv
