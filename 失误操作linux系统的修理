@@ -8,3 +8,11 @@ ImportError: No module named count
 然后查看HTSeq的路径下文件，回忆才发现当时的失误操作导致了重要文件被移动。最后将５个文件还原至原路径
 ~/miniconda2/lib/python2.7/site-packages/HTSeq/scripts
 教训，以后用正则表达式移动文件时一定要注意！
+
+当系统的perl与conda安装的perl发生冲突的时候会出现以下报错
+perl: symbol lookup error: /home/zhangxx/perl5/lib/perl5/x86_64-linux-thread-multi/auto/Cwd/Cwd.so:
+undefined symbol: Perl_xs_apiversion_bootcheck
+解决方法：只指定一个perl进行使用
+echo 'export PERL5LIB=""' >> ~/.bashrc
+source ~/.bashrc
+以上方法是将指定使用的那个perl打印入bashrc作为以后全局使用的指定perl
