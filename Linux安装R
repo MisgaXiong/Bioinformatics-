@@ -1,0 +1,17 @@
+lsb_release -a #输入命令查看当前系统源版本（我的Ubuntu18.04LTS版本是Codename bionic的）
+#百度搜索R for Linux（选择Linux版本）
+#在https://cran.r-project.org/bin/linux/ubuntu中复制最新版本的R地址
+deb https://cloud.r-project.org/bin/linux/ubuntu bionic-cran35/ #(因为我的codename是bionic)
+sudo gedit /etc/apt/sources.list
+#在最后一行加入复制的地址
+deb https://cloud.r-project.org/bin/linux/ubuntu bionic-cran35/
+#在https://cran.r-project.org/mirrors.html中选择中国的镜像
+#我选择的https://mirrors/ustc.edu.cn/CRAN/
+#将sources.list中的R地址修改为
+deb https://mirrors/ustc.edu.cn/CRAN/bin/linux/ubuntu bionic-cran35/
+#保存，关闭
+sudo apt-get update
+#如果报错提示无密钥等信息则输入
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
+sudo apt-get updata
+sudo apt-get install r-base
