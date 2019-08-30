@@ -1,0 +1,44 @@
+%% bash install QIIME2 建议Ubuntu系统，CentOS则只能将其他分析软件装在conda的其他虚拟环境里了
+wget https://data.qiime2.org/distro/core/qiime2-2019.7-py36-linux-conda.yml
+conda env create -n qiime2-2019.7 --file qiime2-2019.7-py36-linux-conda.yml
+
+1.测序数据读取，由于国内大多数实验室并没有加入EMP(Earth Microbiome Project),故大多数测序数据没有EMP格式
+首先下载数据，在NCBI获得SRR_Acc_List.txt
+
+#!/usr/bin/bash download.sh
+cat SRR_Acc_List.txt | while read -r line
+do
+name="$(echo $line | cut -c 1-6)"
+wget ftp://ftp.ncbi.nlm.nih.gov/sra-instant/reads/ByRun/sra/SRR/$name/$line/$line.sra
+done
+
+%%bash sra2fastq
+for i in `cat SRR_Acc_List.txt`
+do
+fastq-dump --gzip --split-3 -A ${i}.sra
+done
+mkdir ../FASTQ
+mv *gz ../FASTQ
+cd ../
+
+%%bash pe-33-mainfest文件准备
+for i in `cat SRR_Acc_List.txt`
+do
+echo "${i} $PWD/FASTQ/${i}.sra_1.fastq.gz $PWD/FASTQ/${i}.sra_2.fastq.gz" >> pe-33-mainfest
+done
+sed -i 's/ /\t/g' pe-33-mainfest
+
+#QIIME data import
+conda activate qiime2-2019.7
+
+%%bash QIIME2 reads data import
+qiime tools import \
+  --type 'SampleData[PairedEndSequencesWithQuality]' \
+  --input-path pe-33-mainfest \
+  --output-path paired-end-demux.qza \
+  --input-format PairedEndFastqManifestPhred33V2 #mainfest是不属于EMP和Casava格式的测序数据的清单文件，由于是双端Phred33则写这个选项
+ 
+ %%bash QIIME2 QC
+ qiime demux summarize \
+  --i-data paired-end-demux.qza \
+  --o-visualization paired-end-demux_summary.qzv
