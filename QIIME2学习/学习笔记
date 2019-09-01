@@ -38,7 +38,16 @@ qiime tools import \
   --output-path paired-end-demux.qza \
   --input-format PairedEndFastqManifestPhred33V2 #mainfest是不属于EMP和Casava格式的测序数据的清单文件，由于是双端Phred33则写这个选项
  
- %%bash QIIME2 QC
+ %%bash QIIME2 SUMMARIZE #from the output file, the QC value could be seen
  qiime demux summarize \
   --i-data paired-end-demux.qza \
   --o-visualization paired-end-demux_summary.qzv
+  
+%%bash use dada2 denoise(trim), stats
+time qiime dada2 denoise-paired \
+  --i-demultiplexed-seqs paired-end-demux.qza \
+  --p-trunc-len-f 0 --p-trunc-len-r 232 \
+  --o-representative-sequences paired-end-demux2dada2trim.qza \
+  --o-table paired-end-demux2dada2table.qza \
+  --o-denoising-stats paired-end-demux2dada2stats.qza
+
