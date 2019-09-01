@@ -51,3 +51,8 @@ time qiime dada2 denoise-paired \
   --o-table paired-end-demux2dada2table.qza \
   --o-denoising-stats paired-end-demux2dada2stats.qza
 
+%%bash visualization denoising-stats output
+time qiime metadata tabulate \
+  --m-input-file paired-end-demux2dada2stats.qza \
+  --o-visualization stats-dada2.qzv
+
