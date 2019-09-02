@@ -60,7 +60,23 @@ time qiime metadata tabulate \
 time qiime feature-table summarize \
   --i-table paired-end-demux2dada2table.qza \
   --o-visualization data2table.qzv \
-  --m-sample-metadata-file ExperDesign.tsv #实验设计表格一定要写好，分组、处理、样信息等，注意header中写sampleid标记不同样本
+  --m-sample-metadata-file ExperDesign.tsv #实验设计表格一定要写好，分组、处理、样信息等，注意header中写sampleid标记不同样本,下方标记#q2:types
 time qiime feature-table tabulate-seqs \
   --i-data paired-end-demux2dada2trim.qza \
   --o-visualization dada2trimseqs.qzv
+  
+%%bash phylogenetic analysis
+time qiime phylogeny align-to-tree-mafft-fasttree \
+  --i-sequences paired-end-demux2dada2trim.qza \
+  --o-alignment aligned-dada2trimseqs.qza \
+  --o-masked-alignment masked-aligned-dada2trimseqs.qza \
+  --o-tree unrooted-tree.qza \
+  --o-rooted-tree rooted-tree.qza
+
+%%bash core deversity analysis
+time qiime diversity core-metrics-phylogenetic \
+  --i-phylogeny rooted-tree.qza \
+  --i-table paired-end-demux2dada2table.qza \
+  --p-sampling-depth 9400 \ #指定重抽样/抽平数
+  --m-metadata-file ExperDesign.tsv \
+  --output-dir core-metrics-results
