@@ -56,3 +56,11 @@ time qiime metadata tabulate \
   --m-input-file paired-end-demux2dada2stats.qza \
   --o-visualization stats-dada2.qzv
 
+%%bash visualization FeatureTable and FeatureData summaries
+time qiime feature-table summarize \
+  --i-table paired-end-demux2dada2table.qza \
+  --o-visualization data2table.qzv \
+  --m-sample-metadata-file ExperDesign.tsv #实验设计表格一定要写好，分组、处理、样信息等，注意header中写sampleid标记不同样本
+time qiime feature-table tabulate-seqs \
+  --i-data paired-end-demux2dada2trim.qza \
+  --o-visualization dada2trimseqs.qzv
