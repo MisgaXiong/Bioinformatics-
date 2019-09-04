@@ -80,3 +80,37 @@ time qiime diversity core-metrics-phylogenetic \
   --p-sampling-depth 9400 \ #指定重抽样/抽平数
   --m-metadata-file ExperDesign.tsv \
   --output-dir core-metrics-results
+  
+%%bash alpha deversity显著性分析
+time qiime diversity alpha-group-significance \
+    --i-alpha-diversity core-metrics-results/faith_pd_vector.qza \
+    --m-metadata-file ExperDesign.tsv \
+    --o-visualization core-metrics-results/faith-pd-group-significance.qzv
+time qiime diversity alpha-group-significance \
+    --i-alpha-diversity core-metrics-results/evenness_vector.qza \
+    --m-metadata-file ExperDesign.tsv \
+    --o-visualization core-metrices-results/evenness-group-significance.qzv
+
+%%bash beta deversity显著分析
+time qiime diversity beta-group-significance \
+  --i-distance-matrix core-metrics-results/unweighted_unifrac_distance_matrix.qza \
+  --m-metadata-file sample-metadata.tsv \
+  --m-metadata-column administration-route \ #因beta多样性显著性分析是基于置换检验，耗时长。可以指定分组分析
+  --o-visualization core-metrics-results/unweighted-unifrac-administration-route-significance.qzv \
+  --p-pairwise
+
+time qiime diversity beta-group-significance \
+  --i-distance-matrix core-metrics-results/unweighted_unifrac_distance_matrix.qza \
+  --m-metadata-file sample-metadata.tsv \
+  --m-metadata-column age \ #beta多样性显著性分析按照age分组
+  --o-visualization core-metrics-results/unweighted-unifrac-age-significance.qzv \ 
+  --p-pairwise
+
+%%bash 时间序列分析暂无
+
+%%bash alpha稀疏取线
+time qiime diversity alpha-rarefaction \
+  --i-table paired-end-demux2dada2table.qza \
+  --p-max-depth 15000 \
+  --m-metadata-file ExperDesign.tsv \
+  --o-visualization alpha-rarefaction.qzv
