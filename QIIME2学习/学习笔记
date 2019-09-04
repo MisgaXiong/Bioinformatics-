@@ -114,3 +114,19 @@ time qiime diversity alpha-rarefaction \
   --p-max-depth 15000 \
   --m-metadata-file ExperDesign.tsv \
   --o-visualization alpha-rarefaction.qzv
+
+%%bash Taxonomic analysis and it's visualization
+time qiime feature-classifier classify-sklearn \
+  --i-classifier gg-13-8-99-515-806-nb-classifier.qza \
+  --i-reads paired-end-demux2dada2trim.qza \
+  --o-classification taxonomy.qza
+
+time qiime metadata tabulate
+  --m-input-file taxonomy.qza \
+  --o-visualization taxonomy.qzv
+
+time qiime taxa barplot \
+  --i-table paired-end-demux2data2table.qza \
+  --i-taxonomy taxonomy.qza \
+  --m-metadata-file ExperDesign.tsv \
+  --o-visualization taxa-bar-plots.qzv
