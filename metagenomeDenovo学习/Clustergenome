@@ -1,0 +1,22 @@
+#改软件目前只有Docker版本。Docker的安装详细参考Ubuntu16.04中的CentOSinstallDocker
+#Docker安装好并启动以后，在root下下载该Clustergenome
+git clone https://bitbucket.org/MAVERICLab/docker-clustergenomes.git
+#由于该软件默认添加perl的路径为/usr/local/bin/perl，而实际上大多数Linux中perl在/usr/bin/perl里。所以要修改该软件中两个Docker的配置文件
+#将配置文件中的/usr/local/bin/perl修改为/usr/bin/perl
+#在Clustergenome的文件下运行此命令用于安装
+docker build -t maveric/clustergenomes:dev .
+#安装好后官网给出了如下运行方案（伪代码）
+docker run --rm -v $PWD/inputDir:inputDir -w /inputDir maveric/clustergenomes:dev --source-dir /inputDir --fasta contigs.fasta
+
+#事实上，-v是指将指定路径绑定到Docker容器系统,写冒号，冒号后再跟一遍路径，-w是设置Docker容器内的工作目录，--source-dir是告诉Docker从哪里去
+寻找fasta文件，--fasta后最好也接上路径名称，举例，我在/bio/xiongdy/test/下放了一个宏基因组de novo assembl的数据。现在进行去冗余，cd到该目录下
+docker run --rm -v $PWD/:$PWD/ -w $PWD maveric/clustergenomes:dev --source-dir $PWD/ --fasta $PWD/SRR202943_scaffolds.fasta
+#运行完程序后将出现FINISHING DATA等一大段字符串提示。然后出现如下文件
+
+xxx_95_80.clstr 储存各个contigs的聚类信息
+xxx_95_80_seeds.fna 储存非冗余的contigs
+xxx-numcmer.out.coords
+xxx-numcmer.out.delta
+则表示分析成功，可以进行接下来的分析。
+#NOTE!!!:这个软件是通过perl脚本找到具有95%相似性，覆盖度达80%以上的相似序列，并去除冗余，保留最长种子序列。
+#所以16s分析慎用，因为是de novo组装，在具有一定长度前提下，不同物种的相似度程度还是不会有95%这么高的，但是还是要多思考这个生物学意义
