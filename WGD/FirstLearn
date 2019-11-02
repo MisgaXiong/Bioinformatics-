@@ -1,0 +1,23 @@
+conda create -n wgd python=3.5 blast mcl muscle mafft prank paml  fasttree cmake libpng mpi=1.0=mpich
+git clone https://github.com/arzwa/wgd.git
+cd wgd
+pip install .
+对于i-ADHoRe，需要先在http://bioinformatics.psb.ugent.be/webtools/i-adhore/licensing/同意许可，才能下载i-ADHoRe-3.0
+tar -zxvf i-adhore-3.0.01.tar.gz
+cd i-adhore-3.0.01
+mkdir -p build && cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=~/miniconda3/envs/wgd/
+make -j 4 
+make insatall
+
+
+for i in `cat ../../ID.txt`; do for j in `ls *fasta`; do if grep ${i} ${j}; then mv ${j} ${i}.fasta; fi done; done
+
+for i in `cat ../../ID.txt`; do esearch -db nucleotide -query ${i} | efetch -format gb > ${i}.gbk; done
+for i in `cat ../../ID.txt`; do perl ~/env_perl/getGBKSeq5.pl -i ${i}.gbk -codon 1; done
+
+for i in `cat ../../ID.txt`; do wgd mcl -n 20 --cds --mcl -s ${i}.cds.fasta -o ${i}_cds.out; done
+for i in `cat ../../ID.txt`; do wgd ksd --n_threads 20 ${i}_cds.out/${i}.cds.fasta.blast.tsv.mcl ${i}.cds.fasta; done
+for i in `cat ../../ID.txt`; do wgd syn --feature gene --gene_attribute ID -ks wgd_ksd/${i}.cds.fasta.ks.tsv \
+  ../GFF/${i}.gff3 ${i}_cds.out/${i}.cds.fasta.blast.tsv.mcl;\
+  done
